@@ -96,7 +96,7 @@ def get_threats():
             "mitre": "T1071.001"
         })
 
-    # ----- 4️⃣ Fallback to sampleThreats.json if empty -----
+    '''# ----- 4️⃣ Fallback to sampleThreats.json if empty -----
     if not threats:
         try:
             sample_file_path = os.path.join(os.path.dirname(__file__), '../../frontend/src/data/sampleThreats.json')
@@ -105,6 +105,6 @@ def get_threats():
             print("Using fallback sampleThreats.json")
         except Exception as e:
             print("Failed to load sampleThreats.json:", e)
-            threats = []
+            threats = [] '''
 
     return jsonify(threats)
