@@ -2,6 +2,7 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "supersecretkey")
+    MONGO_URI = os.environ.get("MONGO_URI")
 
     # Flask-Session configuration
     SESSION_TYPE = "filesystem"   # ✅ simplest option for dev
