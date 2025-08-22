@@ -1,0 +1,75 @@
+/* Full page background */
+.login-page {
+  min-height: 100vh; /* Take full viewport height */
+  background: linear-gradient(to right, #667eea, #764ba2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* App title at the top */
+.app-title {
+  font-size: 2.5rem;
+  color: white;
+  margin: 40px 0 20px 0;
+  text-align: center;
+}
+
+/* Wrapper to center login container */
+.login-wrapper {
+  flex: 1; /* Take remaining height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Login container */
+.login-container {
+  background-color: #f8f9fa;
+  padding: 40px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Form fields */
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Login button */
+.login-container button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background-color: #667eea;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Register button */
+.register-btn {
+  margin-top: 15px;
+  background-color: #764ba2;
+}
+
+/* Error message */
+.error {
+  color: red;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}

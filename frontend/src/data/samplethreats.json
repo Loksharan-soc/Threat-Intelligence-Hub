@@ -1,0 +1,22 @@
+[
+  { "type": "IP", "indicator": "192.168.1.101", "severity": "High", "mitre": "T1071.001" },
+  { "type": "IP", "indicator": "10.0.0.55", "severity": "Medium", "mitre": "T1071.002" },
+  { "type": "URL", "indicator": "http://malicious1.example.com", "severity": "High", "mitre": "T1566.002" },
+  { "type": "URL", "indicator": "http://malicious2.example.com", "severity": "Medium", "mitre": "T1566.003" },
+  { "type": "File Hash", "indicator": "abcd1234efgh5678", "severity": "Critical", "mitre": "T1059" },
+  { "type": "File Hash", "indicator": "ijkl9012mnop3456", "severity": "High", "mitre": "T1059.001" },
+  { "type": "IP", "indicator": "172.16.0.12", "severity": "Medium", "mitre": "T1071.003" },
+  { "type": "IP", "indicator": "192.168.1.202", "severity": "High", "mitre": "T1071.004" },
+  { "type": "URL", "indicator": "http://phishing1.example.com", "severity": "Critical", "mitre": "T1566.001" },
+  { "type": "URL", "indicator": "http://phishing2.example.com", "severity": "High", "mitre": "T1566.002" },
+  { "type": "File Hash", "indicator": "qrst5678uvwx9012", "severity": "Medium", "mitre": "T1059.002" },
+  { "type": "File Hash", "indicator": "yzab3456cdef7890", "severity": "High", "mitre": "T1059.003" },
+  { "type": "IP", "indicator": "10.10.10.10", "severity": "Critical", "mitre": "T1071.005" },
+  { "type": "IP", "indicator": "172.16.1.25", "severity": "Medium", "mitre": "T1071.006" },
+  { "type": "URL", "indicator": "http://badsite1.example.com", "severity": "High", "mitre": "T1566.004" },
+  { "type": "URL", "indicator": "http://badsite2.example.com", "severity": "Medium", "mitre": "T1566.005" },
+  { "type": "File Hash", "indicator": "ghij7890klmn1234", "severity": "Critical", "mitre": "T1059.004" },
+  { "type": "File Hash", "indicator": "opqr5678stuv9012", "severity": "High", "mitre": "T1059.005" },
+  { "type": "IP", "indicator": "192.168.100.50", "severity": "Medium", "mitre": "T1071.007" },
+  { "type": "IP", "indicator": "10.0.0.200", "severity": "High", "mitre": "T1071.008" }
+]

@@ -1,0 +1,112 @@
+/* Dashboard Container */
+.dashboard-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f6fa;
+  min-height: 100vh;
+}
+
+
+/* Main Dashboard */
+.dashboard-main {
+  padding: 2rem;
+}
+
+.dashboard-main h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-main p {
+  margin-bottom: 1.5rem;
+  color: #7f8c8d;
+}
+
+/* Controls Cards */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cards-container .card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #fff;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.cards-container input[type="text"] {
+  border: none;
+  outline: none;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  flex: 1;
+}
+
+.cards-container select {
+  border: none;
+  outline: none;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #ecf0f1;
+}
+
+.cards-container button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #27ae60;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.cards-container button:hover {
+  background-color: #2ecc71;
+  transform: translateY(-2px);
+}
+
+/* Threat Table */
+.threat-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.threat-table th, .threat-table td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+}
+
+.threat-table th {
+  background-color: #34495e;
+  color: #ecf0f1;
+  font-weight: bold;
+}
+
+.threat-table tbody tr {
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.threat-table tbody tr:nth-child(even) {
+  background-color: #f7f9fa;
+}
+
+.threat-table tbody tr:hover {
+  background-color: #dcdde1;
+  transition: background-color 0.3s;
+}
