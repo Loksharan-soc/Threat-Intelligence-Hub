@@ -10,8 +10,17 @@ import os
 
 def create_app():
     # ---------------- Flask app initialization ----------------
-    app = Flask(__name__, static_folder="../frontend/dist", static_url_path="/")
+# Absolute path to frontend/dist
+    # __file__ is backend/app/__init__.py
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # goes to backend/
+    project_root = os.path.dirname(repo_root)  # goes to repo root
+    frontend_dist = os.path.join(project_root, 'frontend', 'dist')  # correct path
 
+    
+    if not os.path.exists(frontend_dist):
+        raise RuntimeError(f"React dist folder not found at {frontend_dist}")
+    
+    app = Flask(__name__, static_folder=frontend_dist, static_url_path='')
     # ---------------- Load config ----------------
     app.config.from_object(Config)
 
@@ -41,7 +50,7 @@ def create_app():
 
 
     # ---------------- Enable CORS ----------------
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000"] )
+    CORS(app, supports_credentials=True )
 
     # ---------------- Serve React frontend ----------------
     @app.route('/')
