@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; 
+import axios from "axios";
+import { API_BASE } from "../config";  // <-- use deployed backend
 import "../styles/Login.css";
 
-axios.defaults.withCredentials = true;
-
+axios.defaults.withCredentials = true; // important for session cookies
 
 const Login = () => {
-  const [username, setUsername] = useState(""); 
-  const [password, setPassword] = useState(""); 
-  const [error, setError] = useState("");       
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -22,19 +22,20 @@ const Login = () => {
     }
 
     try {
-      // ✅ Include withCredentials so Flask session cookie is stored
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/login",
+        `${API_BASE}/api/login`, // <-- backend URL from config
         { username, password },
         { withCredentials: true }
       );
 
-      if (response.status === 200) {
-        // ✅ Expect backend to return { user: { username, email, ... } }
+      if (response.status === 200 && response.data.success) {
+        // store user info locally
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("user", JSON.stringify(response.data.user));
 
         navigate("/dashboard");
+      } else {
+        setError(response.data.error || "Login failed");
       }
     } catch (err) {
       if (err.response) setError(err.response.data.error || "Login failed");
