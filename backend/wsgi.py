@@ -1,5 +1,5 @@
 # backend/wsgi.py
-from app import create_app
+from backend.app import create_app  # <-- import from backend.app
 
 app = create_app()
 
