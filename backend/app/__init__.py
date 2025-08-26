@@ -32,7 +32,7 @@ def create_app():
     app.config['SESSION_PERMANENT'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
     app.config['SESSION_COOKIE_SAMESITE'] = "Lax"   # ✅ required for cross-origin
-    app.config['SESSION_COOKIE_SECURE'] = False      # ✅ keep False on localhost (True in prod HTTPS)
+    app.config['SESSION_COOKIE_SECURE'] = False   # ✅ keep False on localhost (True in prod HTTPS)
 
 
     Session(app)  # This initializes filesystem-backed sessions
@@ -53,9 +53,12 @@ def create_app():
     CORS(app, supports_credentials=True )
 
     # ---------------- Serve React frontend ----------------
-    @app.route('/')
+    @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def serve_frontend(path=''):
+        
+        file_path = os.path.join(app.static_folder, path)
+
         if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
             return send_from_directory(app.static_folder, path)
         else:
