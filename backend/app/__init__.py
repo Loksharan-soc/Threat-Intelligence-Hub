@@ -32,7 +32,7 @@ def create_app():
     app.config['SESSION_PERMANENT'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
     app.config['SESSION_COOKIE_SAMESITE'] = "Lax"   # ✅ required for cross-origin
-    app.config['SESSION_COOKIE_SECURE'] = False   # ✅ keep False on localhost (True in prod HTTPS)
+    app.config['SESSION_COOKIE_SECURE'] = True   # ✅ keep False on localhost (True in prod HTTPS)
 
 
     Session(app)  # This initializes filesystem-backed sessions
