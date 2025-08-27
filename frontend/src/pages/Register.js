@@ -5,7 +5,7 @@ import "../styles/Register.css";
 axios.defaults.withCredentials = true; // store session cookie
 
 // Use environment variable for API base URL
-const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -29,7 +29,7 @@ const Register = () => {
       setEmail("");
       setPassword("");
     } catch (err) {
-      
+
       if (err.response && err.response.data && err.response.data.error) {
         setMessage(err.response.data.error);
       } else {
