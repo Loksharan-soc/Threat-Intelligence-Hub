@@ -5,9 +5,6 @@ import "../styles/Login.css";
 
 axios.defaults.withCredentials = true; // store session cookie
 
-// Use environment variable for API base URL
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +22,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        `${API_URL}/api/login`,
+        "http://localhost:5000/api/login",
         { username, password },
         { withCredentials: true }
       );
@@ -41,6 +38,7 @@ const Login = () => {
       }
     } catch (err) {
       if (err.response && err.response.data) {
+        // Display detailed backend error
         setError(err.response.data.error || err.response.data.message || "Server error");
       } else {
         setError("Server error. Try again later.");

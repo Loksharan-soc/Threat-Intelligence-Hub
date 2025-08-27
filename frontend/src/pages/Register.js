@@ -2,11 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../styles/Register.css";
 
-axios.defaults.withCredentials = true; // store session cookie
-
-// Use environment variable for API base URL
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -17,7 +12,7 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`${API_URL}/api/register`, {
+      const response = await axios.post("http://127.0.0.1:5000/api/register", {
         username,
         email,
         password,
@@ -29,7 +24,7 @@ const Register = () => {
       setEmail("");
       setPassword("");
     } catch (err) {
-
+      // Display backend error message
       if (err.response && err.response.data && err.response.data.error) {
         setMessage(err.response.data.error);
       } else {
@@ -41,34 +36,34 @@ const Register = () => {
   return (
     <div className="register-page">
       <h1>Threat Intelligence Hub</h1>
-      <div className="register-container">
-        <h2>Create Account</h2>
-        <form onSubmit={handleRegister}>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit">Register</button>
-        </form>
-        {message && <p className="message">{message}</p>}
-      </div>
+    <div className="register-container">
+      <h2>Create Account</h2>
+      <form onSubmit={handleRegister}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Register</button>
+      </form>
+      {message && <p className="message">{message}</p>}
+    </div>
     </div>
 
   );
