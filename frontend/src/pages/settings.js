@@ -17,7 +17,7 @@ axios.defaults.withCredentials = true; // set globally or per request
  */
 
 
-const API_URL =  "http://localhost:5000" || process.env.REACT_APP_API_URL; // Fallback to localhost if env var is not set
+const API_URL =   process.env.REACT_APP_API_URL; // Fallback to localhost if env var is not set
 
 
 const Settings = () => {
