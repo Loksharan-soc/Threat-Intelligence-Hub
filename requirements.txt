@@ -1,9 +1,0 @@
-Flask
-flask-cors
-flask-session
-pymongo
-gunicorn
-requests
-python-dotenv
-bcrypt
-flask-login
