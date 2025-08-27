@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { API_BASE } from "../config";  // <-- use deployed backend
 import "../styles/Login.css";
 
-axios.defaults.withCredentials = true; // important for session cookies
+axios.defaults.withCredentials = true; // store session cookie
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -23,23 +22,27 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        `${API_BASE}/api/login`, // <-- backend URL from config
+        "http://127.0.0.1:5000/api/login",
         { username, password },
         { withCredentials: true }
       );
 
-      if (response.status === 200 && response.data.success) {
-        // store user info locally
+      console.log("Backend response:", response.data);
+
+      if (response.data.success) {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("user", JSON.stringify(response.data.user));
-
         navigate("/dashboard");
       } else {
         setError(response.data.error || "Login failed");
       }
     } catch (err) {
-      if (err.response) setError(err.response.data.error || "Login failed");
-      else setError("Server error. Try again later.");
+      if (err.response && err.response.data) {
+        // Display detailed backend error
+        setError(err.response.data.error || err.response.data.message || "Server error");
+      } else {
+        setError("Server error. Try again later.");
+      }
     }
   };
 
