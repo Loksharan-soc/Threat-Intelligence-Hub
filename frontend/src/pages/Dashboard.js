@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // For API requests
+import axios from "axios"; 
 import "../styles/Dashboard.css"; 
 import sampleThreats from '../data/sampleThreats.json';
 import { useNavigate } from "react-router-dom"; 
@@ -7,60 +7,50 @@ import { Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+// Use environment variable for API URL
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const Dashboard = () => {
-  // States
-  const [threatsData, setThreatsData] = useState([]); // start empty, will fetch from API
-  const [loading, setLoading] = useState(true);       // loading state
-  const [error, setError] = useState(false);          // error state
+  const [threatsData, setThreatsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    sessionStorage.clear();
+    localStorage.clear();
+    localStorage.removeItem("loggedIn");
+    navigate("/login");
+  };
 
+  const DashboardWrapper = () => {
+    const loggedIn = localStorage.getItem("loggedIn");
+    if (!loggedIn) return <Navigate to="/" />;
+    return <Dashboard />;
+  };
 
-  const navigate = useNavigate(); // hook for navigation
-
-const handleLogout = () => {
-  sessionStorage.clear();   // clear session storage
-  localStorage.clear();     // clear local storage
-    localStorage.removeItem("loggedIn"); // Clear login status
-
-  navigate("/login");       // redirect to login page
-};
-
-
-
-const DashboardWrapper = () => {
-  const loggedIn = localStorage.getItem("loggedIn");
-  if (!loggedIn) {
-    // Not logged in → redirect to login
-    return <Navigate to="/" />;
-  }
-  return <Dashboard />;
-};
-
-  // Fetch live threat data from backend
   useEffect(() => {
-    axios.get("http://127.0.0.1:5000/api/threats")
+    axios.get(`${API_URL}/api/threats`, { withCredentials: true })
       .then(response => {
-        setThreatsData(response.data); 
+        setThreatsData(response.data);
         setLoading(false);
       })
       .catch(err => {
         console.error("Error fetching threats:", err);
-        setThreatsData(sampleThreats); // fallback to local JSON
+        setThreatsData(sampleThreats); 
         setError(true);
         setLoading(false);
       });
   }, []);
 
-  // Filter and search combined
   const filteredThreats = threatsData.filter(threat => {
     const matchesSearch = threat.indicator.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType ? threat.type.toLowerCase() === filterType.toLowerCase() : true;
     return matchesSearch && matchesFilter;
   });
 
-  // Export displayed threats as CSV
   const handleExport = () => {
     const csvRows = [
       ["Type", "Indicator", "Severity", "MITRE Mapping"],
@@ -69,7 +59,6 @@ const DashboardWrapper = () => {
     const csvContent = csvRows.map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = "threats_export.csv";
@@ -79,15 +68,11 @@ const DashboardWrapper = () => {
 
   return (
     <div className="dashboard-container" style={{ marginTop: "60px" }}>
-      {/* Navbar */}
-       <Navbar /> {/* ✅ Navbar only appears here */}
-
-
+      <Navbar />
       <div className="dashboard-main">
         <h1>Dashboard</h1>
         <p>Welcome to your Threat Intelligence Hub!</p>
 
-        {/* Controls */}
         <div className="cards-container">
           <div className="card">
             <input 
@@ -110,7 +95,6 @@ const DashboardWrapper = () => {
           </div>
         </div>
 
-        {/* Threat Table */}
         {loading ? (
           <p>Loading threat data...</p>
         ) : (
@@ -139,8 +123,7 @@ const DashboardWrapper = () => {
           </>
         )}
       </div>
-          <Footer /> {/* ✅ footer at the bottom */}
-
+      <Footer />
     </div>
   );
 };

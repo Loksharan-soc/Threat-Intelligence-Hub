@@ -4,55 +4,32 @@ import "../styles/Settings.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import axios from "axios";
-axios.defaults.withCredentials = true; // set globally or per request
+axios.defaults.withCredentials = true; // send cookies globally
 
-/**
- * Settings Page Component
- * -----------------------
- * Allows the user to:
- * - Change password
- * - Add/remove API keys for threat sources
- * - Enable 2FA
- * - Delete account
- */
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
 const Settings = () => {
   const navigate = useNavigate();
-
-  // -------------------- User State --------------------
   const [user, setUser] = useState(null);
 
-  // -------------------- Password State --------------------
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordError, setPasswordError] = useState(false);
-  const [isSavingPassword, setIsSavingPassword] = useState(false); // disable save button while request
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
 
-  // -------------------- API Keys State --------------------
   const services = [
-    "VirusTotal",
-    "AbuseIPDB",
-    "HybridAnalysis",
-    "AlienVault",
-    "ThreatCrowd",
-    "MISP",
-    "OpenAI",
-    "OTX",
-    "Custom"
+    "VirusTotal","AbuseIPDB","HybridAnalysis","AlienVault","ThreatCrowd","MISP","OpenAI","OTX","Custom"
   ];
   const [selectedService, setSelectedService] = useState("");
   const [customService, setCustomService] = useState({ name: "", apiKey: "" });
   const [apiKeys, setApiKeys] = useState([]);
   const [selectedApiIndexes, setSelectedApiIndexes] = useState([]);
 
-  // -------------------- Two-Factor Authentication --------------------
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [twoFAMethod, setTwoFAMethod] = useState("");
-
-  // -------------------- Account Deletion --------------------
   const [deleting, setDeleting] = useState(false);
 
-  // -------------------- Load user & API keys on mount --------------------
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
@@ -62,13 +39,10 @@ const Settings = () => {
     if (storedApiKeys) setApiKeys(JSON.parse(storedApiKeys));
   }, [navigate]);
 
-  // ==================== HANDLERS ====================
-
-  /** Handle password change */
+  // ---------- Password Change ----------
   const handlePasswordChange = async () => {
     const current = passwordData.currentPassword.trim();
     const newP = passwordData.newPassword.trim();
-
     if (!current || !newP) {
       setPasswordMessage("Both fields are required.");
       setPasswordError(true);
@@ -80,7 +54,7 @@ const Settings = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/change-password",
+        `${API_URL}/api/auth/change-password`,
         { currentPassword: current, newPassword: newP },
         { withCredentials: true }
       );
@@ -100,11 +74,11 @@ const Settings = () => {
       setPasswordError(true);
     } finally {
       setIsSavingPassword(false);
-      setTimeout(() => setPasswordMessage(""), 5000); // auto-clear message
+      setTimeout(() => setPasswordMessage(""), 5000);
     }
   };
 
-  /** Handle account deletion */
+  // ---------- Delete Account ----------
   const handleDeleteAccount = async () => {
     if (deleting) return;
     if (!window.confirm("Are you sure you want to delete your account?")) return;
@@ -112,19 +86,17 @@ const Settings = () => {
     setDeleting(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/delete",
+        `${API_URL}/api/auth/delete`,
         {},
         { withCredentials: true }
       );
-      const data = response.data;
-
       if (response.status === 200) {
-        alert(data.message);
+        alert(response.data.message);
         localStorage.removeItem("loggedIn");
         localStorage.removeItem("user");
         navigate("/login");
       } else {
-        alert(data.message || "Error deleting account");
+        alert(response.data.message || "Error deleting account");
       }
     } catch (err) {
       console.error("Delete account error:", err);
@@ -134,7 +106,7 @@ const Settings = () => {
     }
   };
 
-  /** Add a new threat source / API key */
+  // ---------- Add / Remove API Keys ----------
   const handleAddService = () => {
     if (!selectedService) return;
 
@@ -156,29 +128,25 @@ const Settings = () => {
     const updatedKeys = [...apiKeys, newService];
     setApiKeys(updatedKeys);
     localStorage.setItem("apiKeys", JSON.stringify(updatedKeys));
-
     setSelectedService("");
     setCustomService({ name: "", apiKey: "" });
   };
 
-  /** Remove selected API keys */
   const handleRemoveSelectedApi = () => {
     if (selectedApiIndexes.length === 0) return;
-
     const updatedKeys = apiKeys.filter((_, i) => !selectedApiIndexes.includes(i));
     setApiKeys(updatedKeys);
     localStorage.setItem("apiKeys", JSON.stringify(updatedKeys));
     setSelectedApiIndexes([]);
   };
 
-  /** Enable 2FA */
+  // ---------- Two-Factor ----------
   const handle2FA = (method) => {
     setTwoFAMethod(method);
     setTwoFAEnabled(true);
     alert(`2FA enabled with ${method}`);
   };
 
-  // ==================== RENDER ====================
   return (
     <div className="settings-page" style={{ marginTop: "60px" }}>
       <Navbar />
@@ -215,7 +183,7 @@ const Settings = () => {
           )}
         </section>
 
-        {/* Add / Manage API Keys */}
+        {/* API Keys */}
         <section className="card">
           <h2>Add Threat Source / API Key</h2>
           <div className="service-input">
@@ -223,7 +191,6 @@ const Settings = () => {
               <option value="">Select Service</option>
               {services.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-
             {selectedService && selectedService !== "Custom" && (
               <input
                 type="text"
@@ -232,7 +199,6 @@ const Settings = () => {
                 onChange={(e) => setCustomService({ ...customService, apiKey: e.target.value })}
               />
             )}
-
             {selectedService === "Custom" && (
               <>
                 <input
@@ -249,12 +215,11 @@ const Settings = () => {
                 />
               </>
             )}
-
             <button onClick={handleAddService}>Add Service</button>
           </div>
         </section>
 
-        {/* API Keys List */}
+        {/* API List */}
         {apiKeys.length > 0 && (
           <section className="card api-list-card">
             <h2>Added Services / API Keys</h2>
@@ -283,7 +248,7 @@ const Settings = () => {
           </section>
         )}
 
-        {/* Two-Factor Authentication */}
+        {/* 2FA */}
         <section className="card">
           <h2>Two-Factor Authentication</h2>
           <button onClick={() => handle2FA("Google Authenticator")}>Enable Google Authenticator</button>
