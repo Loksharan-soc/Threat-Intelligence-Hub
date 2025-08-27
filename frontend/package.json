@@ -1,34 +1,30 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "proxy": "http://localhost:5000",
+  "private": true,
   "scripts": {
     "start": "webpack serve --mode development --open",
-    "build": "webpack --mode production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode production"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.28.3",
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-react": "^7.27.1",
     "axios": "^1.11.0",
-    "babel-loader": "^10.0.0",
     "concurrently": "^9.2.0",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.4",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.1",
     "style-loader": "^4.0.0",
-    "webpack": "^5.101.3",
-    "webpack-dev-server": "^5.2.2"
+    "proxy": "http://127.0.0.1:5000"
+
   },
   "devDependencies": {
-    "webpack-cli": "^6.0.1"
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "babel-loader": "^10.0.0",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
   }
 }
