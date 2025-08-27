@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../styles/Register.css";
 
+
+
+
+const API_URL =  "http://localhost:5000" || process.env.REACT_APP_API_URL; // Fallback to localhost if env var is not set
+
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -12,7 +17,7 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/api/register", {
+      const response = await axios.post(`${API_URL}/api/register`, {
         username,
         email,
         password,

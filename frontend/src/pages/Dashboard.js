@@ -7,6 +7,9 @@ import { Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+const API_URL =  "http://localhost:5000" || process.env.REACT_APP_API_URL; // Fallback to localhost if env var is not set
+
+
 const Dashboard = () => {
   // States
   const [threatsData, setThreatsData] = useState([]); // start empty, will fetch from API
@@ -40,7 +43,7 @@ const DashboardWrapper = () => {
 
   // Fetch live threat data from backend
   useEffect(() => {
-    axios.get("http://127.0.0.1:5000/api/threats")
+    axios.get(`${API_URL}/api/threats`)
       .then(response => {
         setThreatsData(response.data); 
         setLoading(false);
