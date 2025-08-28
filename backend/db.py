@@ -1,38 +1,38 @@
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+from pymongo.errors import ConnectionFailure
 
-# -------------------------------
-# MongoDB credentials (hardcoded)
-# -------------------------------
-MONGO_URI = "mongodb+srv://<username>:<password>@ac-slaydsl-shard-00-00.sc6ymra.mongodb.net/?retryWrites=true&w=majority"
+# ---------------------------
+# MongoDB configuration
+# ---------------------------
 
-# -------------------------------
-# MongoClient setup (lazy connect)
-# -------------------------------
-# connect=False ensures the client doesn't try to connect immediately at import
-client = MongoClient(
-    MONGO_URI,
-    tls=True,  # enable TLS
-    tlsAllowInvalidCertificates=True,  # ignore invalid certs
-    connect=False,  # do NOT connect at startup
-    serverSelectionTimeoutMS=10000  # 10 second timeout
+# Replace these with your actual Atlas credentials
+MONGO_USER = "your_atlas_username"
+MONGO_PASS = "your_atlas_password"
+MONGO_CLUSTER = "ac-slaydsl-shard-00-00.sc6ymra.mongodb.net"  # primary host from Atlas
+MONGO_DBNAME = "tihub_db"
+
+# MongoDB URI
+MONGO_URI = (
+    f"mongodb+srv://{MONGO_USER}:{MONGO_PASS}@{MONGO_CLUSTER}/"
+    f"{MONGO_DBNAME}?retryWrites=true&w=majority"
 )
 
-# -------------------------------
-# Database & Collection
-# -------------------------------
-db = client["tihub"]  # your DB name
+# Create client with lazy connection (won't attempt handshake until first query)
+client = MongoClient(
+    MONGO_URI,
+    connect=False,                  # lazy connect to prevent Gunicorn crash
+    tls=True,                       # enable TLS/SSL
+    tlsAllowInvalidCertificates=True  # bypass SSL handshake issues
+)
+
+# Database and collections
+db = client[MONGO_DBNAME]
 users_collection = db["users"]
+# Add more collections here if needed
 
-# -------------------------------
-# Optional test function (lazy connection)
-# -------------------------------
-def test_connection():
-    try:
-        # First query triggers connection & handshake
-        client.admin.command("ping")
-        print("⚡ MongoDB connection successful!")
-    except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-        print(f"❌ MongoDB connection failed: {e}")
-
-# You can call test_connection() in run.py or Flask startup if you want
+# Test connection (only if you want to check at startup)
+try:
+    client.admin.command("ping")
+    print("⚡ MongoDB client created. Connection will be tested on first query.")
+except ConnectionFailure:
+    print("❌ MongoDB connection failed. Will retry on first query.")
