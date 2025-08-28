@@ -19,8 +19,7 @@ def create_app():
 
     # Enable sessions and CORS
     Session(app)
-    CORS(app, origins=["https://tihub.onrender.com"], supports_credentials=True)
-
+    CORS(app, supports_credentials=True)
 
     # Register blueprints
     app.register_blueprint(auth_bp)  # /api/login, etc.
