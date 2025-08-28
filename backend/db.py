@@ -1,38 +1,30 @@
 # backend/db.py
 import os
-from urllib.parse import quote_plus
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
+from dotenv import load_dotenv
 
-# -------------------- MONGODB CONFIG --------------------
-# Use environment variables for credentials
-MONGO_USER = os.getenv("MONGO_USER", "your_username")
-MONGO_PASS = os.getenv("MONGO_PASS", "your_password")
-MONGO_DB = os.getenv("MONGO_DB", "your_database")
-MONGO_HOST = os.getenv("MONGO_HOST", "cluster0.mongodb.net")
+# Load environment variables from .env (optional, mainly for local development)
+load_dotenv()
 
-# Encode username and password safely for the URI
-MONGO_USER_ESCAPED = quote_plus(MONGO_USER)
-MONGO_PASS_ESCAPED = quote_plus(MONGO_PASS)
+# MongoDB connection string (full URI, not SRV)
+# Example format:
+# mongodb://username:password@host1:27017,host2:27017,host3:27017/dbname?ssl=true&replicaSet=atlas-xxxx-shard-0&authSource=admin&retryWrites=true&w=majority
+MONGO_URI = os.getenv("MONGO_URI")
 
-# Full connection URI
-MONGO_URI = f"mongodb+srv://{MONGO_USER_ESCAPED}:{MONGO_PASS_ESCAPED}@{MONGO_HOST}/{MONGO_DB}?retryWrites=true&w=majority"
-
-# -------------------- CONNECT TO MONGO --------------------
 try:
     client = MongoClient(
         MONGO_URI,
-        tls=True,
-        tlsAllowInvalidCertificates=True,  # Render containers sometimes require this
-        serverSelectionTimeoutMS=10000     # 10s timeout
+        tls=True,  # enable TLS
+        tlsAllowInvalidCertificates=True,  # Atlas cert issues sometimes in cloud containers
+        serverSelectionTimeoutMS=10000  # 10s timeout
     )
-    # Try a quick server call to verify connection
+    # Attempt to get server info to test connection
     client.server_info()
-    print("✅ MongoDB connected successfully")
-except ConnectionFailure as err:
-    print(f"❌ MongoDB connection failed: {err}")
+    print("✅ MongoDB connection successful")
+except Exception as err:
+    print("❌ MongoDB connection failed:", err)
     raise err
 
-# -------------------- DATABASE AND COLLECTIONS --------------------
-db = client[MONGO_DB]
+# Access the database and collection
+db = client.get_default_database()  # uses DB specified in URI
 users_collection = db["users"]
