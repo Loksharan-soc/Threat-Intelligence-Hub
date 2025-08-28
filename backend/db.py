@@ -1,46 +1,43 @@
 # backend/db.py
 from pymongo import MongoClient
 from urllib.parse import quote_plus
+from pymongo.errors import ServerSelectionTimeoutError
 
-# ----------------------------
-# Hardcoded credentials
-# ----------------------------
-USERNAME = "YOUR_USERNAME"  # replace with your MongoDB username
-PASSWORD = "YOUR_PASSWORD"  # replace with your MongoDB password
-CLUSTER = "ac-slaydsl"      # your cluster prefix
-DB_NAME = "tihub"           # database name
+# -----------------------------
+# MongoDB Atlas credentials
+# -----------------------------
+USERNAME = "your_db_username"
+PASSWORD = "your_db_password"
+CLUSTER  = "ac-slaydsl-shard-00-00.sc6ymra.mongodb.net"
+DB_NAME  = "tihub"
 
-# Escape username and password
-USERNAME_ESC = quote_plus(USERNAME)
-PASSWORD_ESC = quote_plus(PASSWORD)
+# URL-encode username and password
+USERNAME_ENC = quote_plus(USERNAME)
+PASSWORD_ENC = quote_plus(PASSWORD)
 
-# MongoDB URI
-MONGO_URI = f"mongodb+srv://{USERNAME_ESC}:{PASSWORD_ESC}@{CLUSTER}.sc6ymra.mongodb.net/{DB_NAME}?retryWrites=true&w=majority"
+# Build the MongoDB connection URI
+MONGO_URI = f"mongodb+srv://{USERNAME_ENC}:{PASSWORD_ENC}@{CLUSTER}/{DB_NAME}?retryWrites=true&w=majority"
 
-# ----------------------------
-# Lazy client creation function
-# ----------------------------
-_client = None
-_db = None
+# Connect with SSL enabled and allow invalid certs for Render
+client = MongoClient(
+    MONGO_URI,
+    tls=True,
+    tlsAllowInvalidCertificates=True,
+    serverSelectionTimeoutMS=10000  # 10s timeout
+)
 
-def get_db():
-    global _client, _db
-    if _client is None:
-        # Create client lazily (after fork, for Gunicorn)
-        _client = MongoClient(
-            MONGO_URI,
-            serverSelectionTimeoutMS=10000,  # 10s timeout
-            tls=True,
-            tlsAllowInvalidCertificates=True  # bypass SSL handshake issues
-        )
-        _db = _client[DB_NAME]
-        print("⚡ MongoDB client created. Connection will be tested on first query.")
-    return _db
+# Select database and collections
+db = client[DB_NAME]
+users_collection = db["users"]
+ioc_collection   = db["iocs"]
 
-# ----------------------------
-# Collections
-# ----------------------------
-def get_users_collection():
-    return get_db()["users"]
+# Test the connection immediately
+try:
+    # The ismaster command is cheap and does not require auth
+    client.admin.command("ping")
+    print("✅ MongoDB connection successful!")
+except ServerSelectionTimeoutError as err:
+    print("❌ MongoDB connection failed:", err)
+    raise
 
-users_collection = get_users_collection()
+print("⚡ MongoDB client created. Connection tested at startup.")
