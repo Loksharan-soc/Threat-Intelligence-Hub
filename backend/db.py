@@ -1,43 +1,38 @@
-# backend/db.py
 from pymongo import MongoClient
-from urllib.parse import quote_plus
-from pymongo.errors import ServerSelectionTimeoutError
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-# -----------------------------
-# MongoDB Atlas credentials
-# -----------------------------
-USERNAME = "your_db_username"
-PASSWORD = "your_db_password"
-CLUSTER  = "ac-slaydsl-shard-00-00.sc6ymra.mongodb.net"
-DB_NAME  = "tihub"
+# -------------------------------
+# MongoDB credentials (hardcoded)
+# -------------------------------
+MONGO_URI = "mongodb+srv://<username>:<password>@ac-slaydsl-shard-00-00.sc6ymra.mongodb.net/?retryWrites=true&w=majority"
 
-# URL-encode username and password
-USERNAME_ENC = quote_plus(USERNAME)
-PASSWORD_ENC = quote_plus(PASSWORD)
-
-# Build the MongoDB connection URI
-MONGO_URI = f"mongodb+srv://{USERNAME_ENC}:{PASSWORD_ENC}@{CLUSTER}/{DB_NAME}?retryWrites=true&w=majority"
-
-# Connect with SSL enabled and allow invalid certs for Render
+# -------------------------------
+# MongoClient setup (lazy connect)
+# -------------------------------
+# connect=False ensures the client doesn't try to connect immediately at import
 client = MongoClient(
     MONGO_URI,
-    tls=True,
-    tlsAllowInvalidCertificates=True,
-    serverSelectionTimeoutMS=10000  # 10s timeout
+    tls=True,  # enable TLS
+    tlsAllowInvalidCertificates=True,  # ignore invalid certs
+    connect=False,  # do NOT connect at startup
+    serverSelectionTimeoutMS=10000  # 10 second timeout
 )
 
-# Select database and collections
-db = client[DB_NAME]
+# -------------------------------
+# Database & Collection
+# -------------------------------
+db = client["tihub"]  # your DB name
 users_collection = db["users"]
-ioc_collection   = db["iocs"]
 
-# Test the connection immediately
-try:
-    # The ismaster command is cheap and does not require auth
-    client.admin.command("ping")
-    print("✅ MongoDB connection successful!")
-except ServerSelectionTimeoutError as err:
-    print("❌ MongoDB connection failed:", err)
-    raise
+# -------------------------------
+# Optional test function (lazy connection)
+# -------------------------------
+def test_connection():
+    try:
+        # First query triggers connection & handshake
+        client.admin.command("ping")
+        print("⚡ MongoDB connection successful!")
+    except (ConnectionFailure, ServerSelectionTimeoutError) as e:
+        print(f"❌ MongoDB connection failed: {e}")
 
-print("⚡ MongoDB client created. Connection tested at startup.")
+# You can call test_connection() in run.py or Flask startup if you want
