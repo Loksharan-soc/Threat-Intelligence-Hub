@@ -1,22 +1,39 @@
 # backend/db.py
-import os
 from pymongo import MongoClient
 from urllib.parse import quote_plus
 
-# ---------------- MongoDB connection ----------------
-MONGO_USER = os.environ.get("MONGO_USER", "cyberdev")      # default for local dev
-MONGO_PASS = os.environ.get("MONGO_PASS", "cyberdev@123")  # default for local dev
-MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER", "intelhub.sc6ymra.mongodb.net")
-MONGO_DB = os.environ.get("MONGO_DB", "threat_hub")
+# ----- MongoDB credentials -----
+MONGO_USER = "loksharan"           # your username
+MONGO_PASS = "SuperSecret123!"     # your password with special characters
+MONGO_HOSTS = "ac-slaydsl-shard-00-00.sc6ymra.mongodb.net:27017," \
+              "ac-slaydsl-shard-00-01.sc6ymra.mongodb.net:27017," \
+              "ac-slaydsl-shard-00-02.sc6ymra.mongodb.net:27017"
+MONGO_DB = "tihub"                 # your DB name
+REPLICA_SET = "ac-slaydsl-shard-0" # your Atlas replica set name
 
-# Encode password for special characters
-password = quote_plus(MONGO_PASS)
+# ----- URL-encode username & password -----
+user_enc = quote_plus(MONGO_USER)
+pass_enc = quote_plus(MONGO_PASS)
 
-# Connection URI
-MONGO_URI = f"mongodb+srv://{MONGO_USER}:{password}@{MONGO_CLUSTER}/?retryWrites=true&w=majority&appName=intelhub"
+# ----- Build the URI -----
+MONGO_URI = (
+    f"mongodb://{user_enc}:{pass_enc}@{MONGO_HOSTS}/"
+    f"{MONGO_DB}?ssl=true&replicaSet={REPLICA_SET}&authSource=admin&retryWrites=true&w=majority"
+)
 
-# Mongo client & collections
-client = MongoClient(MONGO_URI)
+# ----- Connect to MongoDB -----
+try:
+    client = MongoClient(
+        MONGO_URI,
+        tls=True,
+        tlsAllowInvalidCertificates=True,  # needed for Render SSL
+        serverSelectionTimeoutMS=10000      # 10s timeout
+    )
+    print("⚡ MongoDB client created. Connection will be tested on first query.")
+except Exception as err:
+    print("❌ MongoDB connection failed:", err)
+    raise err
+
+# ----- Collections -----
 db = client[MONGO_DB]
 users_collection = db["users"]
-threats_collection = db["threats"]
