@@ -2,38 +2,45 @@
 from pymongo import MongoClient
 from urllib.parse import quote_plus
 
-# ----- MongoDB credentials -----
-MONGO_USER = "loksharan"           # your username
-MONGO_PASS = "SuperSecret123!"     # your password with special characters
-MONGO_HOSTS = "ac-slaydsl-shard-00-00.sc6ymra.mongodb.net:27017," \
-              "ac-slaydsl-shard-00-01.sc6ymra.mongodb.net:27017," \
-              "ac-slaydsl-shard-00-02.sc6ymra.mongodb.net:27017"
-MONGO_DB = "tihub"                 # your DB name
-REPLICA_SET = "ac-slaydsl-shard-0" # your Atlas replica set name
+# ----------------------------
+# Hardcoded credentials
+# ----------------------------
+USERNAME = "YOUR_USERNAME"  # replace with your MongoDB username
+PASSWORD = "YOUR_PASSWORD"  # replace with your MongoDB password
+CLUSTER = "ac-slaydsl"      # your cluster prefix
+DB_NAME = "tihub"           # database name
 
-# ----- URL-encode username & password -----
-user_enc = quote_plus(MONGO_USER)
-pass_enc = quote_plus(MONGO_PASS)
+# Escape username and password
+USERNAME_ESC = quote_plus(USERNAME)
+PASSWORD_ESC = quote_plus(PASSWORD)
 
-# ----- Build the URI -----
-MONGO_URI = (
-    f"mongodb://{user_enc}:{pass_enc}@{MONGO_HOSTS}/"
-    f"{MONGO_DB}?ssl=true&replicaSet={REPLICA_SET}&authSource=admin&retryWrites=true&w=majority"
-)
+# MongoDB URI
+MONGO_URI = f"mongodb+srv://{USERNAME_ESC}:{PASSWORD_ESC}@{CLUSTER}.sc6ymra.mongodb.net/{DB_NAME}?retryWrites=true&w=majority"
 
-# ----- Connect to MongoDB -----
-try:
-    client = MongoClient(
-        MONGO_URI,
-        tls=True,
-        tlsAllowInvalidCertificates=True,  # needed for Render SSL
-        serverSelectionTimeoutMS=10000      # 10s timeout
-    )
-    print("⚡ MongoDB client created. Connection will be tested on first query.")
-except Exception as err:
-    print("❌ MongoDB connection failed:", err)
-    raise err
+# ----------------------------
+# Lazy client creation function
+# ----------------------------
+_client = None
+_db = None
 
-# ----- Collections -----
-db = client[MONGO_DB]
-users_collection = db["users"]
+def get_db():
+    global _client, _db
+    if _client is None:
+        # Create client lazily (after fork, for Gunicorn)
+        _client = MongoClient(
+            MONGO_URI,
+            serverSelectionTimeoutMS=10000,  # 10s timeout
+            tls=True,
+            tlsAllowInvalidCertificates=True  # bypass SSL handshake issues
+        )
+        _db = _client[DB_NAME]
+        print("⚡ MongoDB client created. Connection will be tested on first query.")
+    return _db
+
+# ----------------------------
+# Collections
+# ----------------------------
+def get_users_collection():
+    return get_db()["users"]
+
+users_collection = get_users_collection()
