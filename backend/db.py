@@ -1,27 +1,17 @@
 # backend/db.py
+import os
 from pymongo import MongoClient
-from urllib.parse import quote_plus
 
 # ---------------- MongoDB connection ----------------
-MONGO_USER = "cyberdev"
-MONGO_PASS = "cyberdev@123"
-MONGO_DB = "threat_hub"
+# Get URI from environment variable
+MONGO_URI = os.environ.get("MONGO_URI")
 
-# Encode password for special characters
-password = quote_plus(MONGO_PASS)
-
-# Direct host connection (replace with your cluster hosts)
-MONGO_URI = (
-    f"mongodb://{MONGO_USER}:{password}@"
-    "ac-slaydsl-shard-00-00.sc6ymra.mongodb.net:27017,"
-    "ac-slaydsl-shard-00-01.sc6ymra.mongodb.net:27017,"
-    "ac-slaydsl-shard-00-02.sc6ymra.mongodb.net:27017/"
-    f"{MONGO_DB}?ssl=true&authSource=admin&retryWrites=true&w=majority"
-)
+if not MONGO_URI:
+    raise Exception("MONGO_URI environment variable not set!")
 
 # Mongo client & collections
 client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
-db = client[MONGO_DB]
+db = client.get_default_database()  # automatically uses DB from URI
 users_collection = db["users"]
 threats_collection = db["threats"]
 
