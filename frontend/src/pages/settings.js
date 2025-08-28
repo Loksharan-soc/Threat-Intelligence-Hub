@@ -15,6 +15,10 @@ axios.defaults.withCredentials = true; // set globally or per request
  * - Enable 2FA
  * - Delete account
  */
+
+const API_URL = process.env.REACT_APP_API_URL;
+
+
 const Settings = () => {
   const navigate = useNavigate();
 
@@ -80,7 +84,7 @@ const Settings = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/change-password",
+        `${API_URL}/api/auth/change-password`,
         { currentPassword: current, newPassword: newP },
         { withCredentials: true }
       );
@@ -112,7 +116,7 @@ const Settings = () => {
     setDeleting(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/delete",
+        `${API_URL}/api/auth/delete`,
         {},
         { withCredentials: true }
       );

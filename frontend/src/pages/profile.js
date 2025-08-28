@@ -4,6 +4,10 @@ import "../styles/Profile.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+
+const API_URL = process.env.REACT_APP_API_URL;
+
+
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -21,7 +25,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/logout", {
+      const response = await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         credentials: "include", // send session cookie
       });
@@ -48,7 +52,7 @@ const Profile = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/update", {
+      const response = await fetch(`${API_URL}/api/auth/update`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
