@@ -4,8 +4,8 @@ import axios from "axios";
 import "../styles/Login.css";
 
 axios.defaults.withCredentials = true; // store session cookie
-const API_URL = process.env.REACT_APP_API_URL;
-
+// const API_URL ="http://localhost:5000"|| process.env.REACT_APP_API_URL;
+const API_URL ="http://localhost:5000";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
