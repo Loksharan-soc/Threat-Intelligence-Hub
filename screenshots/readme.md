@@ -39,19 +39,19 @@ This project showcases modern web development with **React**, **Axios**, **REST 
 ## Demo Screenshots
 
 ### 1. Login Page
-![Login](screenshots/login.png)  
+![Login](login.png)  
 The login page features a clean, dark SOC-themed interface with glowing buttons and real-time validation feedback. Users can authenticate to access the dashboard.  
 
 ---
 
 ### 2. Register Page
-![Register](screenshots/register.png)  
+![Register](register.png)  
 The registration page allows new users to create accounts. All fields are validated, and the design matches the SOC neon theme.  
 
 ---
 
 ### 3. Dashboard
-![Dashboard](screenshots/dashboard.png)  
+![Dashboard](dashboard.png)  
 The main SOC dashboard displays threat cards, search and filter controls, and a threat table. Cards include animated alert indicators, and the table highlights threat severity.  
 
 ---
