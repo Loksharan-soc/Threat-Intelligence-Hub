@@ -2,30 +2,37 @@
 import os
 from urllib.parse import quote_plus
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
-# ---------------- MongoDB connection ----------------
-MONGO_USER = os.environ.get("MONGO_USER", "cyberdev")
-MONGO_PASS = os.environ.get("MONGO_PASS", "cyberdev@123")
-MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER", "intelhub.sc6ymra.mongodb.net")
-MONGO_DB = os.environ.get("MONGO_DB", "threat_hub")
+# -------------------- MONGODB CONFIG --------------------
+# Use environment variables for credentials
+MONGO_USER = os.getenv("MONGO_USER", "your_username")
+MONGO_PASS = os.getenv("MONGO_PASS", "your_password")
+MONGO_DB = os.getenv("MONGO_DB", "your_database")
+MONGO_HOST = os.getenv("MONGO_HOST", "cluster0.mongodb.net")
 
-# Encode password for special characters
-password = quote_plus(MONGO_PASS)
+# Encode username and password safely for the URI
+MONGO_USER_ESCAPED = quote_plus(MONGO_USER)
+MONGO_PASS_ESCAPED = quote_plus(MONGO_PASS)
 
-# Connection URI
-MONGO_URI = f"mongodb+srv://{MONGO_USER}:{password}@{MONGO_CLUSTER}/{MONGO_DB}?retryWrites=true&w=majority"
+# Full connection URI
+MONGO_URI = f"mongodb+srv://{MONGO_USER_ESCAPED}:{MONGO_PASS_ESCAPED}@{MONGO_HOST}/{MONGO_DB}?retryWrites=true&w=majority"
 
-# ---------------- Mongo Client ----------------
-client = MongoClient(
-    MONGO_URI,
-    tls=True,
-    tlsAllowInvalidCertificates=True,  # allow Render to bypass TLS validation
-    serverSelectionTimeoutMS=10000
-)
+# -------------------- CONNECT TO MONGO --------------------
+try:
+    client = MongoClient(
+        MONGO_URI,
+        tls=True,
+        tlsAllowInvalidCertificates=True,  # Render containers sometimes require this
+        serverSelectionTimeoutMS=10000     # 10s timeout
+    )
+    # Try a quick server call to verify connection
+    client.server_info()
+    print("✅ MongoDB connected successfully")
+except ConnectionFailure as err:
+    print(f"❌ MongoDB connection failed: {err}")
+    raise err
 
-# ---------------- Database & Collections ----------------
+# -------------------- DATABASE AND COLLECTIONS --------------------
 db = client[MONGO_DB]
 users_collection = db["users"]
-threats_collection = db["threats"]
-
-print("⚡ MongoDB client created. Connection will be tested on first query.")
