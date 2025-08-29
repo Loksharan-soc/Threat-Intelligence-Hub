@@ -1,32 +1,25 @@
 # backend/db.py
 import os
-import re
-from urllib.parse import quote_plus
 from pymongo import MongoClient
+from urllib.parse import quote_plus
 
 # ---------------- MongoDB connection ----------------
-MONGO_URI_RAW = os.environ.get("MONGO_URI")  # raw URI from Render env
+MONGO_USER = os.environ.get("MONGO_USER", "cyberdev")       # default for local dev
+MONGO_PASS = os.environ.get("MONGO_PASS", "cyberdev@123")   # default for local dev
+MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER", "intelhub.sc6ymra.mongodb.net")
+MONGO_DB = os.environ.get("MONGO_DB", "threat_hub")
 
-if not MONGO_URI_RAW:
-    raise Exception("MONGO_URI environment variable not set!")
+# Encode password for special characters
+password = quote_plus(MONGO_PASS)
 
-# Extract password from URI and encode it
-# Expected format: mongodb+srv://username:password@cluster/...
-match = re.match(r"(mongodb(?:\+srv)?://[^:]+:)([^@]+)(@.+)", MONGO_URI_RAW)
-if not match:
-    raise Exception("MONGO_URI format invalid!")
+# Connection URI (explicitly includes DB)
+MONGO_URI = (
+    f"mongodb+srv://{MONGO_USER}:{password}"
+    f"@{MONGO_CLUSTER}/{MONGO_DB}?retryWrites=true&w=majority&appName=intelhub"
+)
 
-encoded_password = quote_plus(match[2])
-MONGO_URI = f"{match[1]}{encoded_password}{match[3]}"
-
-# Create MongoDB client
-client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
-
-# Use default database from URI if specified
-db = client.get_default_database()
-
-# Collections
+# Mongo client & collections
+client = MongoClient(MONGO_URI)
+db = client.get_database()  # gets the DB from URI directly
 users_collection = db["users"]
 threats_collection = db["threats"]
-
-print("⚡ MongoDB client created. Connection will be tested on first query.")
