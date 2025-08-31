@@ -1,50 +1,41 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // For API requests
+import axios from "axios"; 
 import "../styles/Dashboard.css"; 
 import sampleThreats from '../data/sampleThreats.json';
-import { useNavigate } from "react-router-dom"; 
-import { Navigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 
-// const API_URL = process.env.REACT_APP_API_URL;
+
+
+
+
+axios.defaults.withCredentials = true; // store session cookie
+// const API_URL ="http://localhost:5000"|| process.env.REACT_APP_API_URL;
 // const API_URL ="http://localhost:5000";
 const API_URL ="https://tihub.onrender.com";
 
 
+
+
+
 const Dashboard = () => {
-  // States
-  const [threatsData, setThreatsData] = useState([]); // start empty, will fetch from API
-  const [loading, setLoading] = useState(true);       // loading state
-  const [error, setError] = useState(false);          // error state
+  const [threatsData, setThreatsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
 
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    sessionStorage.clear();
+    localStorage.clear();
+    navigate("/login");
+  };
 
-  const navigate = useNavigate(); // hook for navigation
-
-const handleLogout = () => {
-  sessionStorage.clear();   // clear session storage
-  localStorage.clear();     // clear local storage
-    localStorage.removeItem("loggedIn"); // Clear login status
-
-  navigate("/login");       // redirect to login page
-};
-
-
-
-const DashboardWrapper = () => {
-  const loggedIn = localStorage.getItem("loggedIn");
-  if (!loggedIn) {
-    // Not logged in → redirect to login
-    return <Navigate to="/" />;
-  }
-  return <Dashboard />;
-};
-
-  // Fetch live threat data from backend
+  // Fetch threats
   useEffect(() => {
     axios.get(`${API_URL}/api/threats`)
       .then(response => {
@@ -53,20 +44,20 @@ const DashboardWrapper = () => {
       })
       .catch(err => {
         console.error("Error fetching threats:", err);
-        setThreatsData(sampleThreats); // fallback to local JSON
+        setThreatsData(sampleThreats);
         setError(true);
         setLoading(false);
       });
   }, []);
 
-  // Filter and search combined
+  // Filter and search
   const filteredThreats = threatsData.filter(threat => {
     const matchesSearch = threat.indicator.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType ? threat.type.toLowerCase() === filterType.toLowerCase() : true;
     return matchesSearch && matchesFilter;
   });
 
-  // Export displayed threats as CSV
+  // Export CSV
   const handleExport = () => {
     const csvRows = [
       ["Type", "Indicator", "Severity", "MITRE Mapping"],
@@ -83,17 +74,20 @@ const DashboardWrapper = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Login check
+  const loggedIn = localStorage.getItem("loggedIn");
+  if (!loggedIn) {
+    return <Navigate to="/login" />;
+  }
+
   return (
     <div className="dashboard-container" style={{ marginTop: "60px" }}>
-      {/* Navbar */}
-       <Navbar /> {/* ✅ Navbar only appears here */}
-
+      <Navbar />
 
       <div className="dashboard-main">
         <h1>Dashboard</h1>
         <p>Welcome to your Threat Intelligence Hub!</p>
 
-        {/* Controls */}
         <div className="cards-container">
           <div className="card">
             <input 
@@ -107,7 +101,7 @@ const DashboardWrapper = () => {
             <select value={filterType} onChange={e => setFilterType(e.target.value)}>
               <option value="">Filter by Type</option>
               <option value="IP">IP</option>
-              <option value="URL">Domain</option>
+              <option value="URL">URL</option>
               <option value="File Hash">Hash</option>
             </select>
           </div>
@@ -116,7 +110,6 @@ const DashboardWrapper = () => {
           </div>
         </div>
 
-        {/* Threat Table */}
         {loading ? (
           <p>Loading threat data...</p>
         ) : (
@@ -141,12 +134,11 @@ const DashboardWrapper = () => {
                 ))}
               </tbody>
             </table>
-            {error && <p style={{color: "red"}}>Failed to fetch live threat data. Showing sample data.</p>}
+            {error && <p style={{color: "red"}}>Failed to fetch live data, using local sample.</p>}
           </>
         )}
       </div>
-          <Footer /> {/* ✅ footer at the bottom */}
-
+      <Footer />
     </div>
   );
 };

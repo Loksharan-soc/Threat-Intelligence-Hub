@@ -60,13 +60,16 @@ const Settings = () => {
 
   // -------------------- Load user & API keys on mount --------------------
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-    else navigate("/login");
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) setUser(JSON.parse(storedUser));
+  else navigate("/login");
 
-    const storedApiKeys = localStorage.getItem("apiKeys");
-    if (storedApiKeys) setApiKeys(JSON.parse(storedApiKeys));
-  }, [navigate]);
+  // Fetch API keys from backend
+  axios.get(`${API_URL}/api/settings/api-keys`, { withCredentials: true })
+    .then(res => setApiKeys(res.data.apiKeys || []))
+    .catch(err => console.error("Failed to fetch API keys:", err));
+}, [navigate]);
+
 
   // ==================== HANDLERS ====================
 
@@ -141,48 +144,81 @@ const Settings = () => {
   };
 
   /** Add a new threat source / API key */
-  const handleAddService = () => {
-    if (!selectedService) return;
+const handleAddService = async () => {
+  if (!selectedService) {
+    alert("Please select a service");
+    return;
+  }
 
-    let newService;
-    if (selectedService === "Custom") {
-      if (!customService.name || !customService.apiKey) {
-        alert("Enter both service name and API key");
-        return;
-      }
-      newService = customService;
-    } else {
-      if (!customService.apiKey) {
-        alert("Enter API key for the selected service");
-        return;
-      }
-      newService = { name: selectedService, apiKey: customService.apiKey };
+  let newService;
+  if (selectedService === "Custom") {
+    if (!customService.name || !customService.apiKey) {
+      alert("Enter both service name and API key");
+      return;
     }
+    newService = customService;
+  } else {
+    if (!customService.apiKey) {
+      alert(`Enter API key for ${selectedService}`);
+      return;
+    }
+    newService = { name: selectedService, apiKey: customService.apiKey };
+  }
 
-    const updatedKeys = [...apiKeys, newService];
-    setApiKeys(updatedKeys);
-    localStorage.setItem("apiKeys", JSON.stringify(updatedKeys));
+  try {
+    const res = await axios.post(
+      `${API_URL}/api/settings/api-keys`,
+      { service: newService },
+      { withCredentials: true }
+    );
 
-    setSelectedService("");
-    setCustomService({ name: "", apiKey: "" });
-  };
+    if (res.status === 200) {
+      setApiKeys(res.data.apiKeys || []);
+      alert(`${newService.name} API key added successfully`);
+    } else {
+      alert(res.data.message || "Failed to add API key");
+    }
+  } catch (err) {
+    console.error("Failed to add API key:", err.response || err);
+    alert(err.response?.data?.message || "Server error while adding API key");
+  }
+
+  // Reset input fields
+  setSelectedService("");
+  setCustomService({ name: "", apiKey: "" });
+};
+
+
 
   /** Remove selected API keys */
-  const handleRemoveSelectedApi = () => {
-    if (selectedApiIndexes.length === 0) return;
+const handleRemoveSelectedApi = async () => {
+  if (selectedApiIndexes.length === 0) {
+    alert("No API key selected for removal");
+    return;
+  }
 
-    const updatedKeys = apiKeys.filter((_, i) => !selectedApiIndexes.includes(i));
-    setApiKeys(updatedKeys);
-    localStorage.setItem("apiKeys", JSON.stringify(updatedKeys));
-    setSelectedApiIndexes([]);
-  };
+  const keysToRemove = selectedApiIndexes.map(i => apiKeys[i]);
 
-  /** Enable 2FA */
-  const handle2FA = (method) => {
-    setTwoFAMethod(method);
-    setTwoFAEnabled(true);
-    alert(`2FA enabled with ${method}`);
-  };
+  try {
+    const res = await axios.delete(`${API_URL}/api/settings/api-keys`, {
+      data: { keys: keysToRemove },
+      withCredentials: true
+    });
+
+    if (res.status === 200) {
+      setApiKeys(res.data.apiKeys || []);
+      setSelectedApiIndexes([]);
+      alert("Selected API key(s) removed successfully");
+    } else {
+      alert(res.data.message || "Failed to remove API key(s)");
+    }
+  } catch (err) {
+    console.error("Failed to remove API key(s):", err.response || err);
+    alert(err.response?.data?.message || "Server error while removing API key(s)");
+  }
+};
+
+
 
   // ==================== RENDER ====================
   return (

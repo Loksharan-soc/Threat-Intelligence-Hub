@@ -8,3 +8,4 @@ requests>=2.32.0
 python-dotenv>=1.0.0
 bcrypt>=4.1.0
 flask-login>=0.6.3
+flask-jwt-extended==4.4.4
