@@ -15,12 +15,6 @@ axios.defaults.withCredentials = true; // set globally or per request
  * - Enable 2FA
  * - Delete account
  */
-
-// const API_URL = process.env.REACT_APP_API_URL;
-// const API_URL ="http://localhost:5000";
-const API_URL ="https://tihub.onrender.com";
-
-
 const Settings = () => {
   const navigate = useNavigate();
 
@@ -60,16 +54,13 @@ const Settings = () => {
 
   // -------------------- Load user & API keys on mount --------------------
   useEffect(() => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) setUser(JSON.parse(storedUser));
-  else navigate("/login");
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+    else navigate("/login");
 
-  // Fetch API keys from backend
-  axios.get(`${API_URL}/api/settings/api-keys`, { withCredentials: true })
-    .then(res => setApiKeys(res.data.apiKeys || []))
-    .catch(err => console.error("Failed to fetch API keys:", err));
-}, [navigate]);
-
+    const storedApiKeys = localStorage.getItem("apiKeys");
+    if (storedApiKeys) setApiKeys(JSON.parse(storedApiKeys));
+  }, [navigate]);
 
   // ==================== HANDLERS ====================
 
@@ -89,7 +80,7 @@ const Settings = () => {
 
     try {
       const response = await axios.post(
-        `${API_URL}/api/auth/change-password`,
+        "http://localhost:5000/api/auth/change-password",
         { currentPassword: current, newPassword: newP },
         { withCredentials: true }
       );
@@ -121,7 +112,7 @@ const Settings = () => {
     setDeleting(true);
     try {
       const response = await axios.post(
-        `${API_URL}/api/auth/delete`,
+        "http://localhost:5000/api/auth/delete",
         {},
         { withCredentials: true }
       );
@@ -144,81 +135,48 @@ const Settings = () => {
   };
 
   /** Add a new threat source / API key */
-const handleAddService = async () => {
-  if (!selectedService) {
-    alert("Please select a service");
-    return;
-  }
+  const handleAddService = () => {
+    if (!selectedService) return;
 
-  let newService;
-  if (selectedService === "Custom") {
-    if (!customService.name || !customService.apiKey) {
-      alert("Enter both service name and API key");
-      return;
-    }
-    newService = customService;
-  } else {
-    if (!customService.apiKey) {
-      alert(`Enter API key for ${selectedService}`);
-      return;
-    }
-    newService = { name: selectedService, apiKey: customService.apiKey };
-  }
-
-  try {
-    const res = await axios.post(
-      `${API_URL}/api/settings/api-keys`,
-      { service: newService },
-      { withCredentials: true }
-    );
-
-    if (res.status === 200) {
-      setApiKeys(res.data.apiKeys || []);
-      alert(`${newService.name} API key added successfully`);
+    let newService;
+    if (selectedService === "Custom") {
+      if (!customService.name || !customService.apiKey) {
+        alert("Enter both service name and API key");
+        return;
+      }
+      newService = customService;
     } else {
-      alert(res.data.message || "Failed to add API key");
+      if (!customService.apiKey) {
+        alert("Enter API key for the selected service");
+        return;
+      }
+      newService = { name: selectedService, apiKey: customService.apiKey };
     }
-  } catch (err) {
-    console.error("Failed to add API key:", err.response || err);
-    alert(err.response?.data?.message || "Server error while adding API key");
-  }
 
-  // Reset input fields
-  setSelectedService("");
-  setCustomService({ name: "", apiKey: "" });
-};
+    const updatedKeys = [...apiKeys, newService];
+    setApiKeys(updatedKeys);
+    localStorage.setItem("apiKeys", JSON.stringify(updatedKeys));
 
-
+    setSelectedService("");
+    setCustomService({ name: "", apiKey: "" });
+  };
 
   /** Remove selected API keys */
-const handleRemoveSelectedApi = async () => {
-  if (selectedApiIndexes.length === 0) {
-    alert("No API key selected for removal");
-    return;
-  }
+  const handleRemoveSelectedApi = () => {
+    if (selectedApiIndexes.length === 0) return;
 
-  const keysToRemove = selectedApiIndexes.map(i => apiKeys[i]);
+    const updatedKeys = apiKeys.filter((_, i) => !selectedApiIndexes.includes(i));
+    setApiKeys(updatedKeys);
+    localStorage.setItem("apiKeys", JSON.stringify(updatedKeys));
+    setSelectedApiIndexes([]);
+  };
 
-  try {
-    const res = await axios.delete(`${API_URL}/api/settings/api-keys`, {
-      data: { keys: keysToRemove },
-      withCredentials: true
-    });
-
-    if (res.status === 200) {
-      setApiKeys(res.data.apiKeys || []);
-      setSelectedApiIndexes([]);
-      alert("Selected API key(s) removed successfully");
-    } else {
-      alert(res.data.message || "Failed to remove API key(s)");
-    }
-  } catch (err) {
-    console.error("Failed to remove API key(s):", err.response || err);
-    alert(err.response?.data?.message || "Server error while removing API key(s)");
-  }
-};
-
-
+  /** Enable 2FA */
+  const handle2FA = (method) => {
+    setTwoFAMethod(method);
+    setTwoFAEnabled(true);
+    alert(`2FA enabled with ${method}`);
+  };
 
   // ==================== RENDER ====================
   return (

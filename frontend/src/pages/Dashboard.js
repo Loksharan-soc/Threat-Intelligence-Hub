@@ -6,20 +6,6 @@ import { useNavigate, Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-
-
-
-
-
-axios.defaults.withCredentials = true; // store session cookie
-// const API_URL ="http://localhost:5000"|| process.env.REACT_APP_API_URL;
-// const API_URL ="http://localhost:5000";
-const API_URL ="https://tihub.onrender.com";
-
-
-
-
-
 const Dashboard = () => {
   const [threatsData, setThreatsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +23,7 @@ const Dashboard = () => {
 
   // Fetch threats
   useEffect(() => {
-    axios.get(`${API_URL}/api/threats`)
+    axios.get("http://127.0.0.1:5000/api/threats")
       .then(response => {
         setThreatsData(response.data); 
         setLoading(false);

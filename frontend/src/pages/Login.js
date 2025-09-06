@@ -4,25 +4,12 @@ import axios from "axios";
 import "../styles/Login.css";
 
 axios.defaults.withCredentials = true; // store session cookie
-// const API_URL ="http://localhost:5000"|| process.env.REACT_APP_API_URL;
-// const API_URL ="http://localhost:5000";
-const API_URL ="https://tihub.onrender.com";
-
-
- 
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [showHelp, setShowHelp] = useState(false);
-
   const navigate = useNavigate();
-
-
-   const toggleHelp = () => {
-    setShowHelp(!showHelp);
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,7 +22,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        `${API_URL}/api/login`,
+        "http://localhost:5000/api/login",
         { username, password },
         { withCredentials: true }
       );
@@ -86,20 +73,6 @@ const Login = () => {
           <button className="register-btn" onClick={handleRegister}>
             Create Account
           </button>
-
-           <button className="help-btn" onClick={toggleHelp}>
-            Need Demo Access?
-          </button>
-
-          {showHelp && (
-            <div className="help-popup">
-              <h3>Demo Credentials</h3>
-              <p><strong>Username:</strong> guest-user</p>
-              <p><strong>Password:</strong> guest-password</p>
-              <button onClick={toggleHelp}>Close</button>
-            </div> 
-          )}
-            
         </div>
       </div>
     </div>
