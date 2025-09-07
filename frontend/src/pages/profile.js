@@ -119,7 +119,7 @@ const Profile = () => {
             <p>
               <strong>Email:</strong> {user.email}
             </p>
-            <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+          {/*  <button onClick={() => setIsEditing(true)}>Edit Profile</button>*/}
           </>
         )}
         <button onClick={handleLogout}>Logout</button>

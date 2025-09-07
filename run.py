@@ -10,9 +10,9 @@ app = create_app()  # Flask app instance
 def health_check():
     return {"status": "ok", "message": "Backend is running!"}
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+# @app.route("/")
+# def home():
+#     return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(
