@@ -4,6 +4,13 @@ import "../styles/Profile.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+
+// const API_URL = process.env.REACT_APP_API_URL;
+// const API_URL ="http://localhost:5000";
+const API_URL ="https://tihub.onrender.com"; 
+
+
+
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -21,7 +28,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/logout", {
+      const response = await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         credentials: "include", // send session cookie
       });
@@ -42,37 +49,37 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.username.trim() || !formData.email.trim()) {
-      alert("Username and Email cannot be empty");
-      return;
+  // Use current user values if input fields are empty
+  const updatedUsername = formData.username.trim() || user.username;
+  const updatedEmail = formData.email.trim() || user.email;
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: updatedUsername,
+        email: updatedEmail,
+      }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    console.log("Update response:", data); // debug
+
+    if (response.ok) {
+      setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } else {
+      alert(data.error || data.message || "Error updating profile");
     }
-
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-        }),
-        credentials: "include", // ✅ send session cookie
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUser(data.user);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setIsEditing(false);
-        alert("Profile updated successfully!");
-      } else {
-        alert(data.message || "Error updating profile");
-      }
-    } catch (error) {
-      console.error("Update failed:", error);
-      alert("Server error while updating profile");
-    }
-  };
+  } catch (error) {
+    console.error("Update failed:", error);
+    alert("Server error while updating profile");
+  }
+};
 
   if (!user) return null;
 
@@ -112,7 +119,7 @@ const Profile = () => {
             <p>
               <strong>Email:</strong> {user.email}
             </p>
-          {/*   <button onClick={() => setIsEditing(true)}>Edit Profile</button>*/}
+            <button onClick={() => setIsEditing(true)}>Edit Profile</button>
           </>
         )}
         <button onClick={handleLogout}>Logout</button>
