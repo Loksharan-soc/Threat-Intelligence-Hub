@@ -2,35 +2,37 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
 
+
+
+
+// const API_URL = process.env.REACT_APP_API_URL;
+// const API_URL ="http://localhost:5000";
+const API_URL ="https://tihub.onrender.com";
+
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
  // Logout function
-const handleLogout = async () => {
-  try {
-    // Call backend to clear Flask session
-    const response = await fetch("http://localhost:5000/api/logout", {
-      method: "POST",
-      credentials: "include", // send session cookie
-    });
+ const handleLogout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/logout`, {
+        method: "POST",
+        credentials: "include", // send session cookie
+      });
 
-    if (response.ok) {
-      // Clear localStorage
-      localStorage.removeItem("loggedIn");
-      localStorage.removeItem("user");
-
-      // Redirect to login page
-      navigate("/login");
-    } else {
-      const data = await response.json();
-      alert(data.message || "Error logging out");
+      if (response.ok) {
+        localStorage.removeItem("loggedIn");
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Server error while logging out");
     }
-  } catch (error) {
-    console.error("Logout failed:", error);
-    alert("Server error while logging out");
-  }
-};
+  };
+
 
 
   return (
